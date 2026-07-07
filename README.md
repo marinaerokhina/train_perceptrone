@@ -103,7 +103,7 @@ class SimplePerceptone():
 
 ### 2. Обучение
 ```python
-sp = perc.SimplePerceptone()
+    sp = perc.SimplePerceptone()
     answers = [1, 1, 1, 1, 1, 1, 0, 0, 0, 0]
     train_m = [[1, 1, 1],
         [1, 1, 0],
@@ -115,11 +115,11 @@ sp = perc.SimplePerceptone()
         [0, 1, 1],
         [0, 1, 0],
         [0, 0, 1]]
+   p_loss = sp.train(train_m, answers, 0.1)
 ```
 
 ### 3. Визуализация
 ```python
-    p_loss = sp.train(train_m, answers, 0.1)
     mpl.plot(p_loss)
     mpl.xlabel('Эпоха')
     mpl.ylabel('Ошибка (MSE)')
