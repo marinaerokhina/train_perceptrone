@@ -1,37 +1,59 @@
+"""Reproducible demonstration of a single-neuron binary classifier.
+
+Run: python -m src.start --no-plot
+"""
+import argparse
 import numpy as np
-import matplotlib.pyplot as mpl
-import perceptone as perc
+
+from src.perceptone import SimplePerceptone
+
+
+def training_data():
+    # Complete binary truth table: scheduled AND (kit available OR motivation).
+    samples = np.array([
+        [0, 0, 0], [0, 0, 1], [0, 1, 0], [0, 1, 1],
+        [1, 0, 0], [1, 0, 1], [1, 1, 0], [1, 1, 1],
+    ], dtype=float)
+    labels = ((samples[:, 0] == 1)
+              & ((samples[:, 1] == 1) | (samples[:, 2] == 1))).astype(int)
+    return samples, labels
+
+
+def main():
+    parser = argparse.ArgumentParser(description="Single sigmoid neuron (educational)")
+    parser.add_argument("--epochs", type=int, default=5000)
+    parser.add_argument("--learning-rate", type=float, default=0.5)
+    parser.add_argument("--no-plot", action="store_true",
+                        help="Disable interactive Matplotlib graph")
+    parser.add_argument("--save-plot", type=str, default=None,
+                        help="Save training-loss chart to a PNG file")
+    args = parser.parse_args()
+
+    samples, targets = training_data()
+    model = SimplePerceptone(random_state=42)
+    history = model.train(samples, targets, args.learning_rate, args.epochs)
+    predictions = model.predict_classes(samples)
+
+    print("Input -> expected / predicted")
+    for features, target, predicted in zip(samples.astype(int), targets, predictions):
+        print(f"{features.tolist()} -> {int(target)} / {int(predicted)}")
+    print(f"Accuracy on the complete truth table: {np.mean(predictions == targets):.2%}")
+    print(f"Binary cross-entropy: {history[0]:.5f} -> {history[-1]:.5f}")
+
+    if args.save_plot or not args.no_plot:
+        import matplotlib.pyplot as plt
+        plt.plot(history, label="Binary cross-entropy")
+        plt.xlabel("Epoch")
+        plt.ylabel("Loss")
+        plt.grid(True)
+        plt.legend()
+        if args.save_plot:
+            plt.savefig(args.save_plot, dpi=150, bbox_inches="tight")
+            print(f"Saved chart: {args.save_plot}")
+        if not args.no_plot:
+            plt.show()
+        plt.close()
+
 
 if __name__ == "__main__":
-    sp = perc.SimplePerceptone()
-    answers = [1, 1, 1, 1, 1, 1, 0, 0, 0, 0]
-    train_m = [[1, 1, 1],
-        [1, 1, 0],
-        [1, 1, 0],
-        [1, 1, 1],
-        [1, 1, 1],
-        [1, 0, 1],
-        [1, 0, 0],
-        [0, 1, 1],
-        [0, 1, 0],
-        [0, 0, 1]]
-    #print(f"Train result: {sp.predict(train_m)}\n\tanswers: {answers}"
-    #      f"\n\t loss: {sp.train(train_m, answers, 0.1)}")
-
-    p_loss = sp.train(train_m, answers, 0.1)
-    mpl.plot(p_loss)
-    mpl.xlabel('Эпоха')
-    mpl.ylabel('Ошибка (MSE)')
-    mpl.grid()
-    mpl.show()
-
-    train_new = np.random.randint(0, 2, (1000, 3))
-    predictions = sp.predict(train_new)
-    final_decisions = (predictions > 0.5).astype(int)
-    yes_count = np.sum(final_decisions)
-    no_count = len(final_decisions) - yes_count
-    print(f"Из 1000 новых людей:\n\tИдут (1): {yes_count}\n\tОстаются (0): {no_count}")
-    true_answers = (train_new[:, 0] == 1) & ((train_new[:, 1] == 1) | (train_new[:, 2] == 1))
-    true_answers = true_answers.astype(int)
-    accuracy = np.mean(final_decisions == true_answers) * 100
-    print(f"Точность модели: {accuracy:.2f}%")
+    main()
