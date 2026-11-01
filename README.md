@@ -1,163 +1,95 @@
-# train_perceptrone — Перцептрон для решения о тренировке
+# Training Decision Classifier — Single Sigmoid Neuron
 
-Учебный проект по машинному обучению. Реализация простейшей нейронной сети — **перцептрона** — для задачи бинарной классификации: принятия решения о посещении тренировки на основе трёх бинарных признаков.
+**Python · NumPy · Matplotlib · Binary classification · Gradient descent**
 
-## 🎯 О задаче
+An educational implementation of a **single sigmoid neuron** for learning a simple binary decision rule: *Should I attend a scheduled workout?* The three inputs are binary: whether a workout is scheduled, whether clean sportswear is available, and whether there is motivation to go.
 
-Перцептрон должен научиться принимать решение: **"Идти на тренировку?"**, опираясь на три фактора:
+This repository was originally named `train_perceptrone`. The historical `src/perceptone.py` and `SimplePerceptone` spellings are retained for compatibility.
 
-| № | Сегодня тренировка? | Чистая форма есть? | Есть желание? | **Решение** |
-|---|---------------------|--------------------|------------------|--------------|
-| 1 | Да                  | Да                 | Да               | Идти         |
-| 2 | Да                  | Да                 | Нет              | Идти         |
-| 3 | Да                  | Нет                | Да               | Идти         |
-| 4 | Да                  | Нет                | Нет              | Не идти      |
-| 5 | Нет                 | Да                 | Да               | Не идти      |
-| 6 | Нет                 | Да                 | Нет              | Не идти      |
-| 7 | Нет                 | Нет                | Да               | Не идти      |
-| 8 | Нет                 | Нет                | Нет              | Не идти      |
+> **Terminology:** despite the repository's original name, a differentiable sigmoid unit trained using binary cross-entropy is best described as a **logistic-regression / single-neuron classifier**, rather than the classical hard-threshold perceptron. This is **not** a multilayer perceptron (MLP).
 
-**Логика решения:** идти на тренировку стоит, **только если сегодня есть тренировка И ( есть чистая форма ИЛИ есть желание )** 
-Это классическая задача на изучение **линейной разделимости** — перцептрон способен выучить такую функцию, потому что классы разделимы одной прямой (гиперплоскостью).
+## Classification rule
 
-## 📁 Структура проекта
+Attend only when a workout is scheduled **and** at least one of clean sportswear or motivation is available:
 
-```
-train_perceptrone/
-├── src
-     ├── first.py                  # Первая попытка хоть что-то написать
-     ├── perceptonе.py             # Реализация перцептрона
-     ├── start.py                  # Точка входа, обучение и демонстрация
-└── README.md
+```text
+attend = scheduled AND (sportswear_available OR motivated)
 ```
 
-## 🗄 Структура данных
+| Scheduled | Sportswear | Motivated | Expected |
+| :---: | :---: | :---: | :---: |
+| 0 | 0 | 0 | 0 |
+| 0 | 0 | 1 | 0 |
+| 0 | 1 | 0 | 0 |
+| 0 | 1 | 1 | 0 |
+| 1 | 0 | 0 | 0 |
+| 1 | 0 | 1 | 1 |
+| 1 | 1 | 0 | 1 |
+| 1 | 1 | 1 | 1 |
 
-Обучающая таблица содержит 3 столбца:
+The training set contains all eight possible combinations — no duplicates or inconsistent labels.
 
-| Столбец                    | Тип    | Описание                              |
-|----------------------------|--------|---------------------------------------|
-| `Сегодня есть тренировка?` | binary | 1 — да, 0 — нет                       |
-| `Чистая форма в наличии?`  | binary | 1 — да, 0 — нет                       |
-| `Есть желание идти?`       | binary | 1 — да, 0 — нет                       |
+## Quick start
 
-Целевая переменная (решение) выводится на основе комбинации признаков.
+Use Python 3.10+:
 
-## 🚀 Запуск
-
-### Требования
-- Python 3.8+
-- NumPy
-- Mathplotlib (визуализация)
-
-## 💡 Как работает код
-
-### 1. Класс перцептрона
-```python
-class SimplePerceptone():
-    def __init__(self):
-        self._w = np.random.rand(3)
-        self._bias = np.random.rand(1)
-
-    def predict(self, train):
-        res = np.dot(train, self._w)
-        result = (res + self._bias)
-        return (1 / (1 + np.exp(-result)))
-
-    def train(self, sample, ans, l_rate):
-        self._history = []
-        sample = np.array(sample)
-        ans = np.array(ans)
-        for _ in range(10000):
-            pred_result = self.predict(sample)
-            mse = np.mean((pred_result - ans)**2)
-            self._history.append(float(mse))
-            err = pred_result - ans
-            grad = np.dot(sample.T, err) / len(ans)
-            self._w = self._w - (l_rate * grad)
-            self._bias = self._bias - (l_rate * np.mean(err))
-        return self._history
+```bash
+git clone https://github.com/marinaerokhina/train_perceptrone.git
+cd train_perceptrone
+python -m venv .venv
 ```
 
-### 2. Обучение
-```python
-    sp = perc.SimplePerceptone()
-    answers = [1, 1, 1, 1, 1, 1, 0, 0, 0, 0]
-    train_m = [[1, 1, 1],
-        [1, 1, 0],
-        [1, 1, 0],
-        [1, 1, 1],
-        [1, 1, 1],
-        [1, 0, 1],
-        [1, 0, 0],
-        [0, 1, 1],
-        [0, 1, 0],
-        [0, 0, 1]]
-   p_loss = sp.train(train_m, answers, 0.1)
+Activate the environment (`.venv\Scripts\Activate.ps1` on Windows PowerShell or `source .venv/bin/activate` on macOS/Linux), then:
+
+```bash
+python -m pip install -r requirements.txt
+python -m src.start --no-plot
 ```
 
-### 3. Визуализация
-```python
-    mpl.plot(p_loss)
-    mpl.xlabel('Эпоха')
-    mpl.ylabel('Ошибка (MSE)')
-    mpl.grid()
-    mpl.show()
+To display the learning curve, run `python -m src.start`. To export a chart without opening a window:
+
+```bash
+python -m src.start --no-plot --save-plot loss.png
 ```
 
-### 4. Проверка
-```python
-    train_new = np.random.randint(0, 2, (1000, 3))
-    predictions = sp.predict(train_new)
-    final_decisions = (predictions > 0.5).astype(int)
-    yes_count = np.sum(final_decisions)
-    no_count = len(final_decisions) - yes_count
-    print(f"Из 1000 новых людей:\n\tИдут (1): {yes_count}\n\tОстаются (0): {no_count}")
-    true_answers = (train_new[:, 0] == 1) & ((train_new[:, 1] == 1) | (train_new[:, 2] == 1))
-    true_answers = true_answers.astype(int)
-    accuracy = np.mean(final_decisions == true_answers) * 100
-    print(f"Точность модели: {accuracy:.2f}%")
+## How learning works
+
+1. Initialize three small weights and one bias with a deterministic seed.
+2. Compute `p = sigmoid(X @ weights + bias)`.
+3. Measure **binary cross-entropy** loss.
+4. Update weights using the batch gradient `X.T @ (p - y) / n`.
+5. Compare predictions against the complete eight-row truth table.
+
+The model is deliberately simple and fully implemented with NumPy. No ML framework or pretrained model is used. Running the example shows per-row decisions, loss before and after training, and accuracy on **these same eight training examples**.
+
+**Important:** Reporting 100% accuracy on a truth table used for training is an educational demonstration, **not** evidence of real-world predictive performance or generalization. The data is synthetic and deterministic.
+
+## Repository structure
+
+```text
+src/
+  perceptone.py      Sigmoid model, binary cross-entropy and batch updates
+  start.py           Complete truth table, training and optional graph
+  first.py           Original early exploration (preserved unchanged)
+tests/
+  test_perceptone.py Unit tests for rule, training and input validation
+README.md            English documentation
+README_RUS.md        Original detailed Russian notes
+requirements.txt     Required Python packages
 ```
 
-## 📊 Результаты
+## Tests
 
-После обучения перцептрон выводит график зависимости среднеквадратичной ошибки от эпохи, а также результат работы на тестовом, случайно сгенерированном наборе данных:
-```
-Из 1000 новых людей:
-	Идут (1): 379
-	Остаются (0): 621
-Точность модели: 100.00%
+```bash
+python -m unittest discover -s tests -v
 ```
 
-## 🛠 Технологии
+GitHub Actions checks Python imports, executes unit tests and runs the headless demonstration. The graph is optional, keeping CI compatible with headless systems.
 
-- **Python 3.x**
-- **NumPy** — векторные операции и линейная алгебра
-- **Matplotlib** — визуализация обучения
+## Follow-up ideas
 
-## 📚 Чему научилась
+- Compare a classical step-function perceptron with sigmoid+BCE optimization
+- Explain linear separability with an interactive plot
+- Explore a nonlinearly separable dataset and why a multilayer network becomes necessary
 
-✅ Понимание принципа работы перцептрона  
-✅ Реализация алгоритма обучения с нуля  
-✅ Работа с бинарными признаками  
-✅ Понимание линейной разделимости  
-✅ Подбор гиперпараметров (learning rate, epochs)  
-✅ Интерпретация весов модели  
-
-
-## 🔮 Возможные улучшения
-
-- [ ] Загрузка данных из CSV через Pandas  
-- [ ] Добавить визуализацию разделяющей гиперплоскости в 3D
-- [ ] Реализовать многослойный перцептрон (MLP) для неразделимых задач
-- [ ] Добавить функции активации (sigmoid, ReLU)
-- [ ] Реализовать стохастический градиентный спуск (SGD)
-- [ ] Добавить валидацию на отложенной выборке
-- [ ] Интерактивный режим: пользователь вводит признаки, модель принимает решение
-
-## 📝 Примечание
-
-Проект создан в учебных целях для понимания основ машинного обучения и нейронных сетей. 
----
-
-**Автор:** Марина Ерохина  
+**Author:** Marina Erokhina · Small independent educational machine-learning project.
