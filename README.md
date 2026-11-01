@@ -29,28 +29,16 @@ attend = scheduled AND (sportswear_available OR motivated)
 
 The training set contains all eight possible combinations — no duplicates or inconsistent labels.
 
-## Quick start
+## Run
 
-Use Python 3.10+:
-
-```bash
-git clone https://github.com/marinaerokhina/train_perceptrone.git
-cd train_perceptrone
-python -m venv .venv
-```
-
-Activate the environment (`.venv\Scripts\Activate.ps1` on Windows PowerShell or `source .venv/bin/activate` on macOS/Linux), then:
+Requires **Python 3.10+**. From the project root:
 
 ```bash
-python -m pip install -r requirements.txt
-python -m src.start --no-plot
+pip install -r requirements.txt
+python -m src.start
 ```
 
-To display the learning curve, run `python -m src.start`. To export a chart without opening a window:
-
-```bash
-python -m src.start --no-plot --save-plot loss.png
-```
+To run without a plot window, add `--no-plot`.
 
 ## How learning works
 
